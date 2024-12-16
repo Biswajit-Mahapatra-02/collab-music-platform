@@ -21,11 +21,6 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/add")
-    public User addUser(@RequestBody User user) {
-        return userRepository.save(user);
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         User existingUser = userRepository.findByUsername(user.getUsername())
