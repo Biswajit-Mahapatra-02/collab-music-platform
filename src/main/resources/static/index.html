@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Music Platform</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Music Production Platform</h1>
+
+      <!-- Login Form -->
+      <div id="loginSection">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button onclick="handleLogin()">Login</button>
+        <p id="errorMessage" class="error-message"></p>
+        <button onclick="window.location.href='register.html'">
+          Register User
+        </button>
+      </div>
+
+      <!-- Welcome Message -->
+      <div id="welcomeSection" style="display: none">
+        <h2 id="welcomeMessage"></h2>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>

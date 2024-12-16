@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Music Platform</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Register</h1>
+
+      <!-- Registration Form -->
+      <div id="registrationSection">
+        <input type="text" id="regUsername" placeholder="Username" required />
+        <input
+          type="password"
+          id="regPassword"
+          placeholder="Password"
+          required
+        />
+        <input type="email" id="regEmail" placeholder="Email" required />
+        <button onclick="handleRegister()">Register</button>
+        <p id="regErrorMessage" class="error-message"></p>
+      </div>
+
+      <!-- Success Message -->
+      <div id="successSection" style="display: none">
+        <h2 id="successMessage"></h2>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
