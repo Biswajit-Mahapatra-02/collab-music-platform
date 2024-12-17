@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Uploaded files are not needed in the repository
+src/main/resources/static/upload

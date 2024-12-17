@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <header class="dashboard-header">
+      <h1>
+        Welcome, <span id="welcomeMessage" style="font-weight: bold"></span>!!
+      </h1>
+    </header>
+
+    <div class="dashboard-container">
+      <!-- Projects Section -->
+      <div class="project-section">
+        <h2>Your Projects</h2>
+        <ul id="projectList"></ul>
+        <button id="createProjectBtn">Create New Project</button>
+      </div>
+
+      <!-- Middle Upload and Files control -->
+      <div class="upload-section-wrapper">
+        <!-- Upload Section -->
+        <div class="upload-container">
+          <h2>Upload Files</h2>
+          <div id="uploadSection" style="display: none">
+            <input type="file" id="fileInput" />
+            <button id="uploadBtn">Upload File</button>
+          </div>
+        </div>
+
+        <!-- Files Section -->
+        <div class="files-section">
+          <h2>Project Files</h2>
+          <button id="showFilesBtn">Show Files</button>
+          <ul id="fileList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+  </body>
+</html>

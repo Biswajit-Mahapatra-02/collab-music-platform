@@ -1,46 +1,187 @@
-/* General Styling */
+/* Apply a neutral background and a clean font */
 body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   margin: 0;
-  background-color: #f4f4f9;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  color: #333;
 }
 
+/* Container for forms (login/register) */
 .container {
-  text-align: center;
-  background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
-input {
-  display: block;
-  margin: 0.5rem auto;
-  padding: 0.5rem;
-  width: 80%;
+h1,
+h2 {
+  font-weight: 700;
+  margin: 20px 0;
+  text-align: center;
+}
+
+/* Card-like form sections */
+#loginSection,
+#registrationSection,
+#successSection {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+
+#loginSection h1,
+#registrationSection h1 {
+  margin-bottom: 20px;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
+/* Buttons */
 button {
-  margin: 1rem auto;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
+  background: #0275d8;
   border: none;
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 16px;
   border-radius: 4px;
   cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background: #025aa5;
 }
 
+/* Error message */
 .error-message {
   color: red;
-  font-size: 0.9rem;
+  font-size: 14px;
+  margin-top: -5px;
+  margin-bottom: 15px;
 }
+
+/* Dashboard layout */
+body.dashboard-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Main content area for dashboard */
+.dashboard-container {
+  display: flex;
+  gap: 20px;
+  padding: 0 20px;
+  flex: 1;
+}
+
+/* Sidebar: Projects */
+.project-section {
+  flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.project-section h2 {
+  margin-top: 0;
+}
+
+#projectList {
+  list-style: none;
+  padding: 0;
+}
+
+#projectList li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#projectList li:hover {
+  background: #f9f9f9;
+}
+
+/* Middle: Upload Section */
+.upload-section-wrapper {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.upload-container h2 {
+  margin-top: 0;
+}
+
+#uploadSection {
+  margin-top: 10px;
+}
+
+/* Right: Files Section */
+.files-section {
+  flex: 2;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.files-section h2 {
+  margin-top: 0;
+}
+
+#fileList {
+  list-style: none;
+  padding: 0;
+}
+
+#fileList li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Adjust spacing of buttons */
+#showFilesBtn,
+#createProjectBtn,
+#uploadBtn {
+  margin: 10px 0;
+}
+
+/* Make sure prompt-driven alert boxes aren't influenced by CSS */
+/* You can style the prompt differently or use a custom modal for better UX */

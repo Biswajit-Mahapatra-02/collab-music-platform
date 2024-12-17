@@ -2,8 +2,6 @@ async function handleLogin() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("errorMessage");
-  const loginSection = document.getElementById("loginSection");
-  const welcomeSection = document.getElementById("welcomeSection");
 
   // Clear previous error messages
   errorMessage.textContent = "";
@@ -16,14 +14,11 @@ async function handleLogin() {
     });
 
     if (response.ok) {
-      const fetchedUsername = await response.text();
+      // Store username in sessionStorage for later use
+      sessionStorage.setItem("username", username);
 
-      // Hide login form and display welcome message
-      loginSection.style.display = "none";
-      welcomeSection.style.display = "block";
-      document.getElementById(
-        "welcomeMessage"
-      ).textContent = `Welcome to the Music Production Platform, ${fetchedUsername}!`;
+      // Redirect to the dashboard
+      window.location.href = "dashboard.html";
     } else {
       errorMessage.textContent =
         "Invalid username or password. Please try again.";
@@ -32,29 +27,6 @@ async function handleLogin() {
     console.error("Error:", error);
     errorMessage.textContent = "An error occurred. Please try again later.";
   }
-}
-
-function validateRegistrationFields(username, password, email) {
-  const errorMessage = document.getElementById("regErrorMessage");
-
-  // Clear any previous errors
-  errorMessage.textContent = "";
-
-  // Validation logic
-  if (!username || username.trim() === "") {
-    errorMessage.textContent = "Username is required!";
-    return false;
-  }
-  if (!password || password.length < 6) {
-    errorMessage.textContent = "Password must be at least 6 characters!";
-    return false;
-  }
-  if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-    errorMessage.textContent = "Please enter a valid email!";
-    return false;
-  }
-
-  return true;
 }
 
 async function handleRegister() {
@@ -67,8 +39,6 @@ async function handleRegister() {
   }
 
   const errorMessage = document.getElementById("regErrorMessage");
-  const registrationSection = document.getElementById("registrationSection");
-  const successSection = document.getElementById("successSection");
 
   try {
     const response = await fetch("/api/users/register", {
@@ -78,10 +48,9 @@ async function handleRegister() {
     });
 
     if (response.ok) {
-      const successMessage = document.getElementById("successMessage");
-      successMessage.textContent = `User '${username}' registered successfully!`;
-      registrationSection.style.display = "none";
-      successSection.style.display = "block";
+      alert(`User '${username}' registered successfully! Please log in.`);
+      // Redirect to the login page
+      window.location.href = "index.html";
     } else {
       const errorText = await response.text();
       errorMessage.textContent = errorText;
