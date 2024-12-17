@@ -29,6 +29,15 @@ async function handleLogin() {
   }
 }
 
+function validateRegistrationFields(username, password, email) {
+  // Add your validation logic, e.g.:
+  if (!username || !password || !email) {
+    alert("All fields are required.");
+    return false;
+  }
+  return true;
+}
+
 async function handleRegister() {
   const username = document.getElementById("regUsername").value;
   const password = document.getElementById("regPassword").value;
@@ -46,6 +55,7 @@ async function handleRegister() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password, email }),
     });
+    console.log(response);
 
     if (response.ok) {
       alert(`User '${username}' registered successfully! Please log in.`);
