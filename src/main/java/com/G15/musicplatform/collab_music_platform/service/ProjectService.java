@@ -52,9 +52,9 @@ public class ProjectService {
     public List<Project> getAllProjectsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        // If you only want to show projects that the user is "involved in" (role or owner),
-        // you could do a more custom query. But right now, this just returns projects by .getUser() match.
-        return projectRepository.findByUser(user);
+    
+        // Use the new custom query that returns projects either owned or having user in the roles map
+        return projectRepository.findProjectsWhereUserHasRoleOrIsOwner(user);
     }
 
     /**
