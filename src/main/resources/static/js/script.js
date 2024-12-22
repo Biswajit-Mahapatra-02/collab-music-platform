@@ -1,9 +1,12 @@
+/**
+ * Handle user login and store the username in sessionStorage.
+ */
 async function handleLogin() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("errorMessage");
 
-  // Clear previous error messages
+  // Clear any previous error messages
   errorMessage.textContent = "";
 
   try {
@@ -14,7 +17,7 @@ async function handleLogin() {
     });
 
     if (response.ok) {
-      // Store username in sessionStorage for later use
+      // Store username in sessionStorage for later use (role checks, etc.)
       sessionStorage.setItem("username", username);
 
       // Redirect to the dashboard
@@ -29,25 +32,34 @@ async function handleLogin() {
   }
 }
 
+/**
+ * Simple client-side validation for registration fields.
+ */
 function validateRegistrationFields(username, password, email) {
-  // Add your validation logic, e.g.:
   if (!username || !password || !email) {
     alert("All fields are required.");
     return false;
   }
+  // You could add stronger validation here...
   return true;
 }
 
+/**
+ * Handle user registration and then redirect to login if successful.
+ */
 async function handleRegister() {
   const username = document.getElementById("regUsername").value;
   const password = document.getElementById("regPassword").value;
   const email = document.getElementById("regEmail").value;
-
-  if (!validateRegistrationFields(username, password, email)) {
-    return; // Stop if validation fails
-  }
-
   const errorMessage = document.getElementById("regErrorMessage");
+
+  // Clear any previous error messages
+  errorMessage.textContent = "";
+
+  // Validate fields
+  if (!validateRegistrationFields(username, password, email)) {
+    return;
+  }
 
   try {
     const response = await fetch("/api/users/register", {
@@ -55,7 +67,6 @@ async function handleRegister() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password, email }),
     });
-    console.log(response);
 
     if (response.ok) {
       alert(`User '${username}' registered successfully! Please log in.`);

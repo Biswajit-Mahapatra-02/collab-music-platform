@@ -185,3 +185,32 @@ body.dashboard-body {
 
 /* Make sure prompt-driven alert boxes aren't influenced by CSS */
 /* You can style the prompt differently or use a custom modal for better UX */
+
+/* Adjust the container that holds Upload, Files, and Users sections side by side */
+.middle-panels-wrapper {
+  flex: 2; /* Takes up more space than the project list sidebar */
+  display: flex;
+  gap: 20px;
+}
+
+/* Each panel in the middle can share some common box styling */
+.upload-container,
+.files-section,
+.users-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1; /* Make each panel flex evenly */
+  min-height: 200px; /* Just to give each some visible space */
+}
+
+/* For the user list items */
+#userList {
+  list-style: none;
+  padding: 0;
+}
+
+#userList li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
