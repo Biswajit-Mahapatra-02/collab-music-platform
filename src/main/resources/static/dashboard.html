@@ -21,8 +21,8 @@
         <button id="createProjectBtn">Create New Project</button>
       </div>
 
-      <!-- Middle Upload and Files control -->
-      <div class="upload-section-wrapper">
+      <!-- Middle Upload and Files control (wrap them in a flex/grid container) -->
+      <div class="middle-panels-wrapper">
         <!-- Upload Section -->
         <div class="upload-container">
           <h2>Upload Files</h2>
@@ -37,6 +37,16 @@
           <h2>Project Files</h2>
           <button id="showFilesBtn">Show Files</button>
           <ul id="fileList"></ul>
+        </div>
+
+        <!-- Users Section -->
+        <div class="users-section">
+          <h2>Project Users</h2>
+          <ul id="userList"></ul>
+
+          <!-- Buttons only project owner should see -->
+          <button id="addUserBtn" style="display: none">Add User</button>
+          <button id="removeUserBtn" style="display: none">Remove User</button>
         </div>
       </div>
     </div>

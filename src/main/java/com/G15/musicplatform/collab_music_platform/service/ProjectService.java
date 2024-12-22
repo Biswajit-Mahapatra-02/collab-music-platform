@@ -28,42 +28,134 @@ public class ProjectService {
     @Value("${upload.path}")
     private String uploadDir;
 
+    /**
+     * Allows any user to create a project (no prior role needed).
+     * Immediately afterward, that user is assigned the PROJECT_OWNER role for that project.
+     */
     public Project createProject(String name, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Step 1: Create and save the project
         Project project = new Project();
         project.setName(name);
-        project.setUser(user);
+        project.setUser(user);  // The "owning user" field if you still want to track who 'created' it
+        Project savedProject = projectRepository.save(project);
 
-        return projectRepository.save(project);
+        // Step 2: Now assign the user the PROJECT_OWNER role for this project
+        savedProject.getUserRoles().put(user, "PROJECT_OWNER");
+        savedProject = projectRepository.save(savedProject);
+
+        return savedProject;
     }
 
     public List<Project> getAllProjectsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return projectRepository.findByUser(user);
+    
+        // Use the new custom query that returns projects either owned or having user in the roles map
+        return projectRepository.findProjectsWhereUserHasRoleOrIsOwner(user);
     }
 
-    public void deleteProject(Long projectId) {
+    /**
+     * For assigning a role, only a PROJECT_OWNER (of that project) can do it.
+     */
+    public void assignRole(Long projectId, Long targetUserId, String newRole, String requestingUsername) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // Delete files from the filesystem
+        User requestingUser = userRepository.findByUsername(requestingUsername)
+                .orElseThrow(() -> new RuntimeException("Requesting user not found"));
+        String requestingUserRole = project.getUserRoles().getOrDefault(requestingUser, "NONE");
+
+        // Only PROJECT_OWNER can assign roles
+        if (!"PROJECT_OWNER".equals(requestingUserRole)) {
+            throw new RuntimeException("Only the project owner can assign roles.");
+        }
+
+        // Now assign the role to the target user
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        project.getUserRoles().put(targetUser, newRole);
+        projectRepository.save(project);
+    }
+
+    /**
+     * For revoking a role, only a PROJECT_OWNER can do it.
+     */
+    public void revokeRole(Long projectId, Long targetUserId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        User requestingUser = userRepository.findByUsername(requestingUsername)
+                .orElseThrow(() -> new RuntimeException("Requesting user not found"));
+        String requestingUserRole = project.getUserRoles().getOrDefault(requestingUser, "NONE");
+
+        // Only PROJECT_OWNER can revoke roles
+        if (!"PROJECT_OWNER".equals(requestingUserRole)) {
+            throw new RuntimeException("Only the project owner can revoke roles.");
+        }
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        project.getUserRoles().remove(targetUser);
+        projectRepository.save(project);
+    }
+
+    public String getRoleForUser(Long projectId, Long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return project.getUserRoles().getOrDefault(user, "NONE");
+    }
+
+    /**
+     * Deletes an entire project. Only the PROJECT_OWNER can do this.
+     */
+    public void deleteProject(Long projectId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        User requestingUser = userRepository.findByUsername(requestingUsername)
+                .orElseThrow(() -> new RuntimeException("Requesting user not found"));
+        String requestingUserRole = project.getUserRoles().getOrDefault(requestingUser, "NONE");
+
+        if (!"PROJECT_OWNER".equals(requestingUserRole)) {
+            throw new RuntimeException("Only the project owner can delete this project.");
+        }
+
+        // Delete files from the filesystem first
         for (ProjectFile file : project.getProjectFiles()) {
             deleteFileFromSystem(file.getFilePath());
         }
 
-        // The cascade might handle this, but to be explicit:
         projectFileRepository.deleteAll(project.getProjectFiles());
 
-        // Delete the project
+        // Finally, delete the project
         projectRepository.delete(project);
     }
 
-    public void deleteFileFromProject(Long projectId, Long fileId) {
+    /**
+     * Deletes a file from a project. Owners and Contributors can do this; Reviewers cannot.
+     */
+    public void deleteFileFromProject(Long projectId, Long fileId, String requestingUsername) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // Check the requestor's role
+        User requestingUser = userRepository.findByUsername(requestingUsername)
+                .orElseThrow(() -> new RuntimeException("Requesting user not found"));
+        String requestingUserRole = project.getUserRoles().getOrDefault(requestingUser, "NONE");
+
+        // Only owners and contributors can delete files
+        if (!("PROJECT_OWNER".equals(requestingUserRole) || "CONTRIBUTOR".equals(requestingUserRole))) {
+            throw new RuntimeException("You do not have permission to delete files in this project.");
+        }
 
         ProjectFile file = projectFileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("File not found"));
@@ -73,10 +165,10 @@ public class ProjectService {
             throw new RuntimeException("File does not belong to the specified project.");
         }
 
-        // Delete file from filesystem
+        // Delete from filesystem
         deleteFileFromSystem(file.getFilePath());
 
-        // Delete file record from DB
+        // Delete record from DB
         projectFileRepository.delete(file);
     }
 
@@ -88,4 +180,16 @@ public class ProjectService {
             }
         }
     }
+
+    // In ProjectService.java
+    public String getRoleForUserByUsername(Long projectId, String username) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return the role from projectRoles map or "NONE" if missing
+        return project.getUserRoles().getOrDefault(user, "NONE");
+    }
+
 }
