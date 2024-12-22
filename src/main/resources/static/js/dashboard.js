@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fileList = document.getElementById("fileList");
   const showFilesBtn = document.getElementById("showFilesBtn");
   const userList = document.getElementById("userList");
-  // NEW:
+  // Buttons for adding/removing users:
   const addUserBtn = document.getElementById("addUserBtn");
   const removeUserBtn = document.getElementById("removeUserBtn");
 
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   const checkIfUserIsOwner = async (projectId, username) => {
     try {
-      // GET /api/projects/:projectId/role?userId=xxxx
+      // e.g. GET /api/projects/:projectId/role?username=rahul
       const response = await fetch(
         `/api/projects/${projectId}/role?username=${username}`
       );
@@ -83,14 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Delete project event
           deleteProjectBtn.addEventListener("click", async (e) => {
-            e.stopPropagation(); // Prevent triggering project selection
+            e.stopPropagation();
             const confirmDelete = confirm(
               `Are you sure you want to delete project "${project.name}"?`
             );
             if (!confirmDelete) return;
 
             try {
-              // Must pass username => role check in backend
+              // Pass username => role check in backend
               const delResponse = await fetch(
                 `/api/projects/${project.id}?username=${username}`,
                 { method: "DELETE" }
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
 
-          // Clicking the list item => select this project
+          // Selecting the project
           listItem.addEventListener("click", async () => {
             currentProjectId = project.id;
             uploadSection.style.display = "block";
@@ -168,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cursor: "pointer",
           });
 
+          // Delete file event
           deleteFileBtn.addEventListener("click", async (e) => {
             e.stopPropagation();
             const confirmDelete = confirm(
@@ -232,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /**
-   * Create a new project. After creation, the backend sets the creator as PROJECT_OWNER.
+   * Create a new project. The backend sets the creator as PROJECT_OWNER.
    */
   createProjectBtn.addEventListener("click", async () => {
     const projectName = prompt("Enter the project name:");
@@ -254,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /**
-   * Upload file, passing username => can check role in backend (OWNER/CONTRIBUTOR).
+   * Upload file (OWNER/CONTRIBUTOR).
    */
   uploadBtn.addEventListener("click", async () => {
     if (!currentProjectId) {
@@ -269,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const formData = new FormData();
-    formData.append("file", files[0]); // For MVP, upload one file at a time
+    formData.append("file", files[0]); // For MVP, one file at a time
 
     try {
       const response = await fetch(
@@ -299,32 +300,62 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchProjectFiles(currentProjectId);
   });
 
-  // NEW: Add user to the project (PROJECT_OWNER only).
-  // We'll do a simple prompt for userId or username. In a real app, you'd likely show a user dropdown.
+  /**
+   * Add user to the project by searching their username first.
+   */
   addUserBtn.addEventListener("click", async () => {
     if (!currentProjectId) {
       alert("Please select a project first.");
       return;
     }
 
-    // Prompt for the user ID or username (depending on your backend approach).
-    const targetUserId = prompt("Enter the userId you want to add:");
-    if (!targetUserId) return;
+    // Prompt for the username
+    const targetUsername = prompt("Enter the username you want to add:");
+    if (!targetUsername) return;
 
-    // Prompt for role, or default to "CONTRIBUTOR"
+    // 1) Search if user exists in the backend
+    let userFound = null;
+    try {
+      // This endpoint must exist in your backend:
+      // e.g. GET /api/users/search?username=someString
+      const searchResponse = await fetch(
+        `/api/users/search?username=${targetUsername}`
+      );
+      if (searchResponse.ok) {
+        // Should contain {id: 123, username: "bob"} if found
+        userFound = await searchResponse.json();
+      } else {
+        // 404 or similar
+        const errorMsg = await searchResponse.text();
+        alert(`User not found: ${errorMsg}`);
+        return;
+      }
+    } catch (error) {
+      console.error("Error searching for user:", error);
+      alert("Failed to search for user. Please try again.");
+      return;
+    }
+
+    if (!userFound || !userFound.id) {
+      alert("No such user present.");
+      return;
+    }
+
+    // 2) Ask for role
     const role = prompt(
       "Enter the role (PROJECT_OWNER, CONTRIBUTOR, REVIEWER)?",
       "CONTRIBUTOR"
     );
     if (!role) return;
 
+    // 3) Assign the role
     try {
       const response = await fetch(
-        `/api/projects/${currentProjectId}/assign-role?userId=${targetUserId}&role=${role}&username=${username}`,
+        `/api/projects/${currentProjectId}/assign-role?userId=${userFound.id}&role=${role}&username=${username}`,
         { method: "POST" }
       );
       if (response.ok) {
-        alert(`User ${targetUserId} assigned role: ${role}`);
+        alert(`User '${targetUsername}' assigned role: ${role}`);
         // Refresh user list
         fetchProjectUsers(currentProjectId);
       } else {
@@ -336,26 +367,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // NEW: Remove user from the project (PROJECT_OWNER only).
+  /**
+   * Remove user from the project, by searching the username first.
+   */
   removeUserBtn.addEventListener("click", async () => {
     if (!currentProjectId) {
       alert("Please select a project first.");
       return;
     }
 
-    const targetUserId = prompt(
-      "Enter the userId you want to remove from the project:"
+    const targetUsername = prompt(
+      "Enter the username you want to remove from the project:"
     );
-    if (!targetUserId) return;
+    if (!targetUsername) return;
 
+    // 1) Search if user exists
+    let userFound = null;
+    try {
+      const searchResponse = await fetch(
+        `/api/users/search?username=${targetUsername}`
+      );
+      if (searchResponse.ok) {
+        userFound = await searchResponse.json();
+      } else {
+        const errorMsg = await searchResponse.text();
+        alert(`User not found: ${errorMsg}`);
+        return;
+      }
+    } catch (error) {
+      console.error("Error searching for user:", error);
+      alert("Failed to search for user. Please try again.");
+      return;
+    }
+
+    if (!userFound || !userFound.id) {
+      alert("No such user present.");
+      return;
+    }
+
+    // 2) Revoke the role
     try {
       const response = await fetch(
-        `/api/projects/${currentProjectId}/revoke-role?userId=${targetUserId}&username=${username}`,
+        `/api/projects/${currentProjectId}/revoke-role?userId=${userFound.id}&username=${username}`,
         { method: "POST" }
       );
       if (response.ok) {
-        alert(`User ${targetUserId} removed from project.`);
-        // Refresh user list
+        alert(`User '${targetUsername}' removed from project.`);
         fetchProjectUsers(currentProjectId);
       } else {
         const errorMsg = await response.text();

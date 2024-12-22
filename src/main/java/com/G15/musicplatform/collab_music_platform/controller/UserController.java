@@ -11,7 +11,10 @@ import jakarta.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -148,6 +151,23 @@ public class UserController {
             return ResponseEntity.ok(files);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to fetch files: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUserByUsername(@RequestParam("username") String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            // Return some minimal user info (like ID, username)
+            User user = userOpt.get();
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("id", user.getId());
+            userData.put("username", user.getUsername());
+            return ResponseEntity.ok(userData);
+        } else {
+            // Return 404 or 200 with a message, up to you
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No such user found.");
         }
     }
 
