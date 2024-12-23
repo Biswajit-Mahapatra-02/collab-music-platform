@@ -6,6 +6,7 @@ import com.G15.musicplatform.collab_music_platform.repository.FileMetadataReposi
 import com.G15.musicplatform.collab_music_platform.repository.UserRepository;
 import com.G15.musicplatform.collab_music_platform.service.AudioService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import java.io.File;
@@ -23,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -44,7 +44,6 @@ public class UserController {
 
     @Autowired
     private AudioService audioService;
-
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
@@ -86,7 +85,6 @@ public class UserController {
         userRepository.save(newUser);
         return ResponseEntity.ok("User registered successfully");
     }
-    
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
@@ -105,7 +103,7 @@ public class UserController {
             // Create directory if it does not exist
             File uploadDirectory = new File(uploadDir);
             if (!uploadDirectory.exists()) {
-                uploadDirectory.mkdirs();  // This ensures the uploads folder is created
+                uploadDirectory.mkdirs(); // This ensures the uploads folder is created
             }
 
             File destination = new File(uploadDirectory, fileName);
@@ -127,7 +125,7 @@ public class UserController {
             return ResponseEntity.status(500).body("Failed to upload file: " + e.getMessage());
         }
     }
-        
+
     @PostMapping("/process")
     public ResponseEntity<String> processAudio(@RequestParam("fileName") String fileName) {
         String filePath = uploadDir + "/" + fileName;
@@ -171,4 +169,9 @@ public class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        request.getSession().invalidate();
+        return ResponseEntity.ok("Logged out successfully");
+    }
 }

@@ -423,6 +423,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  const logoutBtn = document.getElementById("logoutBtn");
+  logoutBtn.addEventListener("click", handleLogout);
+
+  async function handleLogout() {
+    try {
+      // Call the server to invalidate session (if using server sessions)
+      await fetch("/api/users/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Server logout error:", err);
+    }
+
+    // Clear local session data
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  }
+
   // Initialize
   fetchProjects();
 });
