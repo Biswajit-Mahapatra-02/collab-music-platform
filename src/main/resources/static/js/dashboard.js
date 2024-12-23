@@ -426,3 +426,53 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize
   fetchProjects();
 });
+
+let stompClient = null;
+
+function connectWebSocket() {
+  const socket = new SockJS("/ws"); // matches registerStompEndpoints("/ws")
+  stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, (frame) => {
+    console.log("Connected: " + frame);
+
+    // Example: subscribe to the project’s topic
+    // If you pass projectId dynamically, you might do this after selecting a project
+    // e.g., subscribeProject(projectId)
+  });
+}
+
+function subscribeProject(projectId) {
+  stompClient.subscribe(`/topic/project/${projectId}`, (message) => {
+    const msgBody = JSON.parse(message.body);
+    console.log("Received a real-time update:", msgBody);
+
+    // Now apply this update in your UI, e.g.,
+    // if (msgBody.action === "CHANGE_TEMPO") => update tempo display
+  });
+}
+
+/**
+ * Send an update (e.g., user changed tempo)
+ */
+function sendUpdate(projectId, action, payload) {
+  if (!stompClient || !stompClient.connected) {
+    console.error("Not connected to WebSocket. Can't send update.");
+    return;
+  }
+  // Build the message
+  const msg = {
+    projectId: projectId,
+    username: sessionStorage.getItem("username"), // or whichever user
+    action: action,
+    payload: payload,
+  };
+  // Send to /app/project/{projectId}/update
+  stompClient.send(`/app/project/${projectId}/update`, {}, JSON.stringify(msg));
+}
+
+// Then call connectWebSocket() when your page loads:
+document.addEventListener("DOMContentLoaded", () => {
+  connectWebSocket();
+  // ...
+});
